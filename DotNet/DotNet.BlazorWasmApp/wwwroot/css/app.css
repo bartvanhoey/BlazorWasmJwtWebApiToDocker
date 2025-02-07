@@ -112,3 +112,10 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+.auth-card {
+    box-sizing: border-box;
+    width: 30rem;
+    height: 35rem;
+    padding: 1rem;
+}
