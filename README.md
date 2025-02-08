@@ -23,7 +23,8 @@ This journey was more difficult than I expected and that's why I decided to writ
 - .NET 9.0 SDK
 - Docker Desktop
 - Git
-- Azure subscription 
+- Azure subscription (or the possibility to create a Database on a remote SQL Server)
+- Postman or Insomnia
 
 ## Docker
 
@@ -166,7 +167,7 @@ The solution would be to add an **appsettings.Production.json** file to the **We
 In this case, the Environment is not the Production environment, and I want to give the Environment another name.
 See the next step!
 
-### Step 2: Specify Environment Name at Container Start
+### Step 3: Specify Environment Name at Container Start
 
 In Step 1 we created the Docker Image first, ran the Image and created/started the Docker Container after.
 Let's run the Docker Image again and specify the Environment: DockerStatusEnv, 
@@ -183,6 +184,7 @@ Unhandled exception. System.IO.FileNotFoundException: The configuration file 'ap
 #### SOLUTION 3: add appsettings.DockerStatusEnv.json file to the Web API project
 
 This is the same FileNoFoundException as before, but this is the Exception we want. 
+
 We can now tell Docker to use the specific **appsettings.DockerStatusEnv.json** file.
 The only thing to do is to copy/paste the **appsettings.Development.json** and name it **appsettings.DockerStatusEnv.json**
 
@@ -209,7 +211,7 @@ Open a Terminal and run the `docker build` command again to generate a new Docke
 docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
 ```
 
-### Step 3: Start the Docker Container from the newly created Docker Image 
+### Step 4: Start the Docker Container from the newly created Docker Image 
 
 We just generated a new Docker Image. Now, it is time to start the Docker Container
 
@@ -220,8 +222,161 @@ Finally, The **Web API Docker Container is up and running**. Yet another problem
 
 ![Docker Container](Images/docker_container_webapi_no_portforwarding.png)
 
+#### PROBLEM 5: Container running, but unreachable from the outside world.
 
+Although the Docker Container is running, see image above, you can not reach it by navigating to http://localhost:8080
 
+#### SOLUTION 5: Publishing ports
+
+From the dockerdocs: Publishing a port provides the ability to break through a little bit of networking isolation by setting up a forwarding rule. 
+As an example, you can indicate that requests on your host’s port 5000 should be forwarded to the container’s port 8080. 
+Publishing ports happens during container creation using the -p (or --publish) flag with docker run. 
+
+The syntax is: `docker run -d -p HOST_PORT:CONTAINER_PORT nginx`
+
+In this case, I would like to use the port **7177** specified in **Properties/launchSettings.json** file of the Web API project.
+
+```bash
+docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
+```
+You can reach the **Web API Docker Container** on your local machine by navigating to http://localhost:7177/weatherforecast
+
+![Weather forecast](Images/docker_container_webapi_weatherforecast.png)
+
+### Step 5: Register a User in the running Web API Docker Container
+
+In the step above, we **forwarded the Docker Container Port to a Port on our local machine**, 
+and we reached the **WeatherController** in the **Web API Docker Container** and **received Weather Data in JSON format**.
+
+Next, we will try out the **Register a User** by sending a **Register Request** to the Web API Docker Container.
+Open **Postman** or **Insomnia```, and make a **Post Request** to the http://localhost:7177/api/account/register url. **Kaboom!**
+
+![Register User](Images/internal_server_error_register_user.png)
+
+#### PROBLEM 6: 500 Internal Server Error - LocalDB is not supported on this platform.
+
+```bash
+ System.PlatformNotSupportedException: LocalDB is not supported on this platform.
+         at Microsoft.Data.SqlClient.SNI.LocalDB.GetLocalDBConnectionString(String localDbInstance)
+         at Microsoft.Data.SqlClient.SNI.SNIProxy.GetLocalDBDataSource(String fullServerName, Boolean& error)
+         at Microsoft.Data.SqlClient.SNI.SNIProxy.CreateConnectionHandle(String fullServerName, ...
+```
+
+When you send the **Register Request** to the **Web API Docker Container** the **RegisterController** is reached.
+The code in the controller gets executed, but throws an exception, when trying to insert the newly created user in the Database.
+
+In **Step 3**, we copy/paste the **appsettings.Development.json** and name it **appsettings.DockerStatusEnv.json** but
+the **Database Connection string** is still the same and Docker tries to make a connection to your **Local Machine's Database**.
+
+As you can read in the exception message, **LocalDB is not supported on this platform**.
+Actually, we don't want docker uses the LocalDB on the Local Machine. We want Docker uses a Sql Server Database on a Remote Machine.
+
+#### SOLUTION 6: Create a remote SQL database in Azure (or somewhere else)
+
+Open the **Azure Portal** and Log in. Click on the **Create Resource** button and Search for **SQL database**.
+Click on the **Create SQL database** and follow the instructions to create an **SQL database server** and an **SQL database**. 
+
+**IMPORTANT**: Choose **Use SQL Authentication** when creating the **SQL database server**,
+and write down the **Server admin login** and **Password** as you will need them later.
+
+Give the **SQL database** the name: **DotNetDb**.
+ 
+After the SQL database and SQL Server have been created, you need to *Add your client IPv4 address* as a **Firewall rule**
+In Azure go to the **SQL database server you created**. In the **Security menu**, click on the **Networking sub menu**. 
+In the **Public Access** Tab, enable **Selected networks**. At the **Firewall rules** section, click on the **Add your client IPv4 address (your IP address)** button and click Save.  
+
+Next, Go to the **SQL database**, and click on **Show database Connection strings**. Copy the **ADO SQL Authentication Connection string**  for later use.
+
+### Step 5: Update Connection string in appsettings.Development.json file - Update Database
+
+Temporary change the Connection string in the appsettings.Development.json file to the copied Connection string.
+IMPORTANT: **Do not forget to update the Password**.
+
+```bash
+Server=tcp:yourservername.database.windows.net,1433;Initial Catalog=DotNetDb;Persist Security Info=False;User ID=yourserveradminlogin;Password=yourpassword;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+```
+
+Open a **Terminal** at the root of the **DotNet.JwtWebApi project** and run the command below to **update the SQL Database in Azure**.
+When the Database update is successful, change the Connection string back to its original value.
+
+```bash
+dotnet ef database update
+```
+
+#### PROBLEM 7: Microsoft.Data.SqlClient.SqlException (0x80131904): Reason: An instance-specific error occurred while establishing a connection to SQL Server.
+
+You would encounter this exception, when you forgot to **Add your client IPv4 address (your IP address)** in your **SQL Database server**
+
+Microsoft.Data.SqlClient.SqlException (0x80131904): Reason: An instance-specific error occurred while establishing a connection to SQL Server. 
+Connection was denied since Deny Public Network Access is set to Yes. ... 
+
+### Step 5: Update Connection string in appsettings.DockerStatusEnv.json file - Register User
+
+Update the **Connection string** in the **appsettings.DockerStatusEnv.json** file.
+
+```bash
+Server=tcp:yourservername.database.windows.net,1433;Initial Catalog=DotNetDb;Persist Security Info=False;User ID=yourserveradminlogin;Password=yourpassword;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+```
+
+The **Connection string** in the **appsettings.DockerStatusEnv.json** file has been updated. 
+
+Yet, we need to apply this change to the Docker Image by creating a new Image. 
+Open a Terminal in the root of the project (where the README.md file exists) and run the command below:
+
+```bash
+docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
+```
+
+After the Docker image has been created, Run the Docker image as a Docker Container by executing this command:
+
+```bash
+docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
+```
+#### PROBLEM 8: There is already a Docker Container running on Port 7177
+
+docker: Error response from daemon: 
+driver failed programming external connectivity on endpoint gifted_babbage (a2e4ab415d8797edb42c54da23002c37e7224471c1b03add5ffe68fc8a20acfe): 
+Bind for 0.0.0.0:7177 failed: port is already allocated.
+
+#### SOLUTION 8: Stop the running Container
+
+Open a Terminal and run `docker ps` to see all the running containers.
+
+![Running Containers](Images/overview_running_containers.png)
+
+To stop a running container, use the **docker stop** command and provide the container ID, in this case
+
+```bash
+docker stop cc38db1cccc9
+```
+
+The old running container is stopped, execute the command below to run the new docker container 
+
+```bash
+docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
+```
+
+### Step 6: Register a User in the running Web API Docker Container
+
+In the step above, we created and updated a remote SQL Database in Azure. 
+And, we generated a new Docker Image and the new Docker Container is running on http://localhost:7177/weatherforecast 
+
+We can reach the **WeatherController** in the **Web API Docker Container** because we **receive Weather Data in JSON format**.
+
+Next, we will try out the **Register a User** by sending a **Register Request** to the Web API Docker Container.
+Open **Postman** or **Insomnia```, and make a **Post Request** to the http://localhost:7177/api/account/register url. 
+
+![Register User](Images/statuscode_200_register_user.png)
+
+Finally, the hard work pays off! We successfully registered a user in our running Docker Container.  
+
+### Step 7: Test User Login and obtain Access and Refresh token
+
+Open **Postman** or **Insomnia```, and make a **Post Request** to the http://localhost:7177/api/account/login url.
+
+![Login User](Images/statuscode_200_login_user.png)
+
+The Login functionality works like expected, and we receive an Access- and Refresh token needed for accessing the API. 
 
 
 
