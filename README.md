@@ -287,7 +287,7 @@ In the **Public Access** Tab, enable **Selected networks**. At the **Firewall ru
 
 Next, Go to the **SQL database**, and click on **Show database Connection strings**. Copy the **ADO SQL Authentication Connection string**  for later use.
 
-### Step 5: Update Connection string in appsettings.Development.json file - Update Database
+### Step 6: Update Connection string in appsettings.Development.json file - Update Database
 
 Temporary change the Connection string in the appsettings.Development.json file to the copied Connection string.
 IMPORTANT: **Do not forget to update the Password**.
@@ -356,7 +356,7 @@ The old running container is stopped, execute the command below to run the new d
 docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
 ```
 
-### Step 6: Register a User in the running Web API Docker Container
+### Step 7: Register a User in the running Web API Docker Container
 
 In the step above, we created and updated a remote SQL Database in Azure. 
 And, we generated a new Docker Image and the new Docker Container is running on http://localhost:7177/weatherforecast 
@@ -370,7 +370,7 @@ Open **Postman** or **Insomnia```, and make a **Post Request** to the http://loc
 
 Finally, the hard work pays off! We successfully registered a user in our running Docker Container.  
 
-### Step 7: Test User Login and obtain Access and Refresh token
+### Step 8: Test User Login and obtain Access and Refresh token
 
 Open **Postman** or **Insomnia```, and make a **Post Request** to the http://localhost:7177/api/account/login url.
 
