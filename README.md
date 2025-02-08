@@ -376,7 +376,7 @@ Open **Postman** or **Insomnia```, and make a **Post Request** to the http://loc
 
 ![Login User](Images/statuscode_200_login_user.png)
 
-The Login functionality works like expected, and we receive an Access- and Refresh token needed for accessing the API. 
+The Login functionality works like expected, and we receive the Access- and Refresh token needed for accessing the JWT protected Web API. 
 
 
 
