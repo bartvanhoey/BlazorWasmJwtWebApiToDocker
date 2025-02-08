@@ -1,18 +1,18 @@
 # Blazor WASM + JWT Web API => Docker
 
-A **step-by-step guide** on how to **containerize** a **Blazor WebAssembly** and a **.NET Web API with JWT Authentication**.
+A **step-by-step guide** on **containerising** a **Blazor WebAssembly** and a **.NET Web API with JWT Authentication**.
 
-At the moment of this writing, I was working on a project where a **.NET Web API** was consumed by a **Blazor WebAssembly** application.
+At the time of this writing, I was working on a project where a **.NET Web API** was consumed by a **Blazor WebAssembly** application.
 
-The API is protected by **Json Web Tokens authentication (JWT)** and both the **Blazor WASM app** as the **.NET Web API** had a reference on the same **Shared Class Library**.
+The API is protected by **JSON Web Tokens authentication (JWT)** and both the **Blazor WASM app** and the **.NET Web API** had a reference on the same **Shared Class Library**.
 
-In the accompanying **GitHub Repo** you find a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**.
+In the accompanying **GitHub Repo**, you find a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**.
 
-To focus on the **Containerization of the project** and to keep things simple **only the Register and Login functionality** are implemented. 
+To focus on the **Project's Containerization** and to keep things simple **only the Register and Login functionality** are implemented. 
 
 ## Goal
 
-**Dockerize** the complete project, so that project owners could always see the latest status of their project, 
+**Dockerize** the complete project, so that project owners can always see the latest status of their project, 
 by just entering a few commands via the terminal. 
 
 This journey was more difficult than I expected and that's why I decided to write an article about it—to organize my thoughts and provide a reference for others who may encounter the same problems.
@@ -35,9 +35,9 @@ These containers can be started in seconds.
 
 To run a Docker Container you first need to create a **Docker Image**. 
 
-You create a **Docker Image** using a Dockerfile. A **Dockerfile** is a file with the **step-by-step instructions** on how to create a **Docker Image** of your application.
+You create a **Docker Image** using a Dockerfile. A **Dockerfile** is a file with **step-by-step instructions** on how to create a **Docker Image** of your application.
 
-You can store your Docker Images in an Image Repository, like **Docker Hub** and share them with other people.
+You can store your Docker Images in an Image Repository, like **Docker Hub** and share them with others.
 
 ### Docker Container
 
@@ -50,8 +50,8 @@ that includes everything needed (application code, runtime, libraries and depend
 
 ### Step 1: Create a Docker Image for the .NET Web API
 
-Open your code editor and add a Dockerfile to the Web API project. 
-I used JetBrains Rider to add the Dockerfile and this is the file that got created.  
+Open your code editor and add a Dockerfile to the Web API project.
+I used JetBrains Rider to add the Dockerfile, which is the file that was created.  
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
@@ -88,7 +88,7 @@ Open a Terminal in the root of the Web API project and run the command below.
 docker build -t imagename-webapi:latest .
 ```
 
-#### PROBLEM1: COPY failed DotNet.JwtWebApi.csproj: not found
+#### PROBLEM 1: COPY failed DotNet.JwtWebApi.csproj: not found
 
 ERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref xzebf1n4v07hubsvxjhnei0p5::ueacb5w3fxctxf1m7dumbzbyf: 
 "/DotNet.JwtWebApi/DotNet.JwtWebApi.csproj": not found
@@ -119,10 +119,10 @@ Whereas the Shared.csproj file is in the root of the DotNet.Shared project and D
 I tried to navigate to the correct path location, by using relative paths, but without success.
 After googling around to overcome this problem, I ended up with another approach.
 
-#### SOLUTION1: Create a DockerWebApi folder 
+#### SOLUTION 1: Create a DockerWebApi folder 
 
 The solution I found was to create a DockerWebApi folder in the parent folder of the WebApi project and the Shared project.
-Once the DockerWebApi folder is created, copy/past the Dockerfile in this folder. 
+Once the DockerWebApi folder is created, copy/paste the Dockerfile in this folder. 
 
 Do not forget to re-add "DotNet.JwtWebApi/" again to the COPY line.
 
@@ -131,7 +131,8 @@ Open a Terminal in the parent folder of DockerWebApi and run the Docker build co
 ```bash
 docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
 ```
-This time, the Docker Image got created, and you can see the image in docker.desktop or by running the `docker images` command 
+
+This time, the Docker Image was created, and you can see the image in docker.desktop or by running the `docker images` command. 
 
 ![Docker Images](Images/docker_images.png)
 
@@ -144,11 +145,11 @@ Open a Terminal and enter the command below:
 docker run imagename-webapi
 ```
 
-#### PROBLEM2: appsettings.Production.json - FileNotFoundException
+#### PROBLEM 2: appsettings.Production.json - FileNotFoundException
 
 After running the command above, an Unhandled FileNotFoundException is thrown.
 This is a correct behavior, in the publishing step of the **DockerFile** **BUILD_CONFIGURATION=Release** is specified,
-which defaults to the Production environment. In the project directory there is no appsettings.Production.json file
+which defaults to the Production environment. In the project directory, there is no appsettings.Production.json file.
 
 ```bash
 Unhandled exception. System.IO.FileNotFoundException: The configuration file 'appsettings.Production.json' was not found and is not optional. The expected physical path was '/app/appsettings.Production.json'.
@@ -158,56 +159,56 @@ Unhandled exception. System.IO.FileNotFoundException: The configuration file 'ap
    at Program.<Main>$(String[] args) in /src/DotNet.JwtWebApi/Program.cs:line 8
 ```
 
-#### SOLUTION2: 
+#### SOLUTION 2: 
 
 The solution would be to add an **appsettings.Production.json** file to the **Web API project**.
 In this case, the Environment is not the Production environment, and I want to give the Environment another name.
-See next step!
+See the next step!
 
 ### Step 2: Specify Environment Name at Container Start
 
-In Step 1 we created the Docker Image first, we ran the Image and created/started the Docker Container after.
+In Step 1 we created the Docker Image first, ran the Image and created/started the Docker Container after.
 Let's run the Docker Image again and specify the Environment: DockerStatusEnv, 
 Open a Terminal in the root of the project and execute the command below:
 
 ```bash
 docker run --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
 ```
-#### PROBLEM3: appsettings.DockerStatusEnv.json - FileNotFoundException
+#### PROBLEM 3: appsettings.DockerStatusEnv.json - FileNotFoundException
 
 ```bash
 Unhandled exception. System.IO.FileNotFoundException: The configuration file 'appsettings.DockerStatusEnv.json' was not found and is not optional.
 ```
-#### SOLUTION3: add appsettings.DockerStatusEnv.json file to the Web API project
+#### SOLUTION 3: add appsettings.DockerStatusEnv.json file to the Web API project
 
-This is basically the same FileNoFoundException as before, but this is the Exception we actually want. 
+This is the same FileNoFoundException as before, but this is the Exception we want. 
 We can now tell Docker to use the specific **appsettings.DockerStatusEnv.json** file.
-The only thing to do, is to copy/paste the **appsettings.Development.json** and name it **appsettings.DockerStatusEnv.json**
+The only thing to do is to copy/paste the **appsettings.Development.json** and name it **appsettings.DockerStatusEnv.json**
 
-After you copied/paste the file, pen a Terminal and run the `docker run` command below. FileNotFoundException again!  
+After you copy/paste the file, open a Terminal and run the `docker run` command below. FileNotFoundException again!  
 
 ```bash
 docker run --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
 ```
-#### PROBLEM4: appsettings.DockerStatusEnv.json - FileNotFoundException
+#### PROBLEM 4: appsettings.DockerStatusEnv.json - FileNotFoundException
 
 As you can see, Docker can still not find the **appsettings.DockerStatusEnv.json**. 
-Although the **appsettings file** is in the **Web API project**, it is **NOT in the Docker Image**
+Although the **app settings file** is in the **Web API project**, it is **NOT in the Docker Image**.
 
 ```bash
 Unhandled exception. System.IO.FileNotFoundException: The configuration file 'appsettings.
 DockerStatusEnv.json' was not found and is not optional. The expected physical path was '/app/appsettings.DockerStatusEnv.json'.
 ```
-#### SOLUTION4: Regenerate the Docker Image
+#### SOLUTION 4: Regenerate the Docker Image
 
-The solution to the above problem, is rather simple. 
-Open a Terminal and run the `docker build` command again to generate a new Docker Image
+The solution to the above problem is rather simple. 
+Open a Terminal and run the `docker build` command again to generate a new Docker Image.
 
 ```bash
 docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
 ```
 
-### Step 3: Start Docker Container from the newly created Docker Image 
+### Step 3: Start the Docker Container from the newly created Docker Image 
 
 
 
