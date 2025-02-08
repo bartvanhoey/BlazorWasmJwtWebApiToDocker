@@ -1,0 +1,69 @@
+@page "/account/register"
+@using System.Net
+@using DotNet.BlazorWasmApp.Models
+@using DotNet.Shared
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory HttpClientFactory
+
+@layout AuthLayout;
+
+<PageTitle>Sign up</PageTitle>
+
+<div class="card mt-3 shadow-sm rounded auth-card">
+    <div class="px-4 pt-4">
+        <h2 class="card-title">Sign up</h2>
+        <hr/>
+    </div>
+    <div class="card-body p-4 h-100">
+        <EditForm class="d-flex flex-column h-100" Model="RegisterInputModel" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUserAsync"
+                  FormName="register">
+            <DataAnnotationsValidator/>
+            <div class="form-floating mb-3">
+                <InputText id="email" @bind-Value="RegisterInputModel.Email" class="form-control" autocomplete="username"
+                           aria-required="true"
+                           placeholder="name@example.com"/>
+                <label for="email">Email</label>
+                <ValidationMessage For="() => RegisterInputModel.Email" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText id="password" type="password" @bind-Value="RegisterInputModel.Password" class="form-control"
+                           autocomplete="new-password"
+                           aria-required="true"/>
+                <label for="password">Password</label>
+                <ValidationMessage For="() => RegisterInputModel.Password" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText id="confirm-password" type="password" @bind-Value="RegisterInputModel.ConfirmPassword"
+                           class="form-control"
+                           autocomplete="new-password" aria-required="true"/>
+                <label for="confirm-password">Confirm Password</label>
+                <ValidationMessage For="() => RegisterInputModel.ConfirmPassword" class="text-danger"/>
+            </div>
+            <div class="mt-auto">
+                <button type="submit" class="w-100 btn btn-primary btn-lg">Create an account</button>
+                <p class="mt-3">
+                    Already have an account? <a href="/account/login">Log in here.</a>
+                </p>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
+    [SupplyParameterFromForm] private RegisterInputModel RegisterInputModel { get; set; } = new();
+
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+    
+    public async Task RegisterUserAsync(EditContext editContext)
+    {
+        var httpclient = HttpClientFactory.CreateClient("ApiHttpClient");
+        var response = await httpclient.PostAsJsonAsync("api/account/register", RegisterInputModel);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            await response.Content.ReadFromJsonAsync<RegisterResult>();
+            NavigationManager.NavigateTo("/account/login");
+        }
+    }
+}

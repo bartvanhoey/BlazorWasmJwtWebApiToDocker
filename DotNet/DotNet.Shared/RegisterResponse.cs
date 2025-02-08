@@ -1,3 +1,4 @@
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace DotNet.Shared;
 
 public class RegisterResponse 
@@ -7,17 +8,13 @@ public class RegisterResponse
         // do not remove
     }
 
-    public RegisterResponse(string? code, string? token) : this()
+    public RegisterResponse(string? code, string? userId) : this()
     {
         Code = code;
-        Token = token;
+        UserId = userId;
     }
-
+    
     
     public string? Code { get; set; }
-    public string? Token { get; set; }
-    public int StatusCode { get; set; }
-    public string? Message { get; set; }
-    
-    
+    public string? UserId { get; set; }
 }
