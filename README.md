@@ -6,16 +6,16 @@ At the time of this writing, I was working on a project where a **.NET Web API**
 
 The API is protected by **JSON Web Tokens authentication (JWT)** and both the **Blazor WASM app** and the **.NET Web API** had a reference on the same **Shared Class Library**.
 
-In the accompanying **GitHub Repo**, you find a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**.
+In the accompanying **GitHub Repo**, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**.
 
 To focus on the **Project's Containerization** and to keep things simple **only the Register and Login functionality** are implemented. 
 
 ## Goal
 
-**Dockerize** the complete project, so that project owners can always see the latest status of their project, 
-by just entering a few commands via the terminal. 
+**Dockerize** the complete project, so that **project owners can always see the latest status** of the project, 
+by just entering a few commands via the Terminal. 
 
-This journey was more difficult than I expected and that's why I decided to write an article about it—to organize my thoughts and provide a reference for others who may encounter the same problems.
+This journey was more difficult than I expected and that's why I decided to write an article about it—**to organize my thoughts and provide a reference for others** who may encounter the same problems.
 
 ## Requirements
 
@@ -23,6 +23,7 @@ This journey was more difficult than I expected and that's why I decided to writ
 - .NET 9.0 SDK
 - Docker Desktop
 - Git
+- Azure subscription 
 
 ## Docker
 
