@@ -7,7 +7,7 @@ The API was protected by **Json Web Tokens authentication (JWT)** and both the W
 
 ## Goal
 
-I wanted to **Dockerize** the complete project, so that project owners could always see the latest status of their project, 
+**Dockerize** the complete project, so that project owners could always see the latest status of their project, 
 by just entering a few commands via the terminal. 
 
 This journey was a bit more difficult than I expected. That's why I decided to write an article about it—to organize my thoughts and provide a reference for others who may encounter the same problems.
@@ -28,15 +28,15 @@ These containers can be started in seconds.
 
 ### Docker Image
 
-To run a **Docker Container** you first need to create a **Docker Image**. 
+To run a Docker Container you first need to create a **Docker Image**. 
 
-You create a **Docker Image** using a **Dockerfile**. A **Dockerfile** is a file with the **step-by-step instructions** on how to create a **Docker Image** of your application.
+You create a **Docker Image** using a Dockerfile. A **Dockerfile** is a file with the **step-by-step instructions** on how to create a **Docker Image** of your application.
 
-You can store your **Docker Images** in a **Image Repository**, like **Docker Hub** and share them with other people.
+You can store your Docker Images in a Image Repository, like **Docker Hub** and share them with other people.
 
 ### Docker Container
 
-When you run a **Docker Image** a **Docker Container** is created. 
+When you run a Docker Image a **Docker Container** is created. 
 
 A **Docker container** is a lightweight, standalone, and executable package,
 that includes everything needed (application code, runtime, libraries and dependencies) to run an application. 
