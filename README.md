@@ -5,6 +5,9 @@ A **step-by-step guide** on how to **containerize** a **Blazor Webassembly** and
 At the moment of this writing, I was working on a project where a **.NET Web API** was consumed by a **Blazor Webassembly** application.
 The API was protected by **Json Web Tokens authentication (JWT)** and both the WASM and the API had a reference on the same **shared class library**.
 
+In the accompanying **GitHub Repo** you find a **.NET Web API protected by JWT authentication**. The API is consumed by a Blazor Webassembly application.
+To focus on the **Containerization of the project** and to keep things simple **only the Register and Login functionality** are implemented. 
+
 ## Goal
 
 **Dockerize** the complete project, so that project owners could always see the latest status of their project, 
@@ -41,6 +44,9 @@ When you run a Docker Image a **Docker Container** is created.
 A **Docker container** is a lightweight, standalone, and executable package,
 that includes everything needed (application code, runtime, libraries and dependencies) to run an application. 
 
+## Step-by-step
+
+### Step 1: Create a Docker Image for the .NET Web API
 
 
  
