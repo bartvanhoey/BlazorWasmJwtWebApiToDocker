@@ -210,6 +210,14 @@ docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
 
 ### Step 3: Start the Docker Container from the newly created Docker Image 
 
+We just generated a new Docker Image. Now, it is time to start the Docker Container
+
+```bash
+docker run --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
+```
+Finally, The **Web API Docker Container is up and running**. Yet another problem arises.  
+
+![Docker Container](Images/docker_container_webapi_no_portforwarding.png)
 
 
 
