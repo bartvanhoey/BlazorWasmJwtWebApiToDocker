@@ -133,7 +133,7 @@ docker build -t yourwebapiimagename:latest -f DockerWebApi/Dockerfile .
 ```
 This time, the Docker Image got created, and you can see the image in docker.desktop or by running the ´docker images´ command 
 
-![Docker Images](Images/docker_images.png, "Docker Images")
+![Docker Images](Images/docker_images.png)
 
  
 
