@@ -730,12 +730,77 @@ A user can log in, and we receive the Access- and Refresh token needed for acces
 There is still one problem. After a successful login, the user is redirected to the home page of the application,
 but it looks like he isn't really authenticated, because the Register- and Login link are still visible.
 
-#### Problem: IDX10206: Unable to validate audience. The 'audiences' parameter is empty.
+#### Problem 14: IDX10206: Unable to validate audience. The 'audiences' parameter is empty.
 
+Open the Developer tools in the browser, and little error message appears: IDX10206: Unable to validate audience. The 'audiences' parameter is empty.
 
+The IDX10206 error occurs during JWT token validation when the audience claim cannot be properly validated. 
+This typically happens due to either incorrect token creation, improper validation configuration.
 
+In our case, it is an improper validation configuration. In the appsettings.DockerStatusEnv.json you find the JWT configuration settings.
+When you have a close look, you can see we still use https instead of http in the urls.
 
+#### Solution 14: change https to http in the appsettings.DockerStatusEnv.json file 
 
+Below the updated and final version of the appsettings.DockerStatusEnv.json file
+
+```bash
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=tcp:dotnetdockerserver.database.windows.net,1433;Initial Catalog=DotNetDb;Persist Security Info=False;User ID=serveradmin;Password=Server2008!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  },
+  "Jwt": {
+    "ValidAudiences": [
+      "http://localhost:7177",
+      "http://localhost:7248"
+    ],
+    "ValidIssuer": "http://localhost:7177",
+    "SecurityKey": "k2uEmrgwWSW34hofdX5jzJ0PNw6Qsnzm",
+    "AccessTokenExpiryInSeconds": 3600,
+    "RefreshTokenExpiryInHours" : 24
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ASPNETCORE_ENVIRONMENT": "Development"
+}
+```
+
+As the appsettings.DockerStatusEnv.json file has changed we need to regenerate the Docker Image.
+Open a Terminal and run the `docker build` command again. 
+
+```bash
+docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
+```
+
+First, Let's clean up our container environment by removing all the running and stopped containers from the previous steps.
+
+```bash
+# Display all containers with their status
+docker ps -a
+## Remove a stopped or running container by its ID. Do this for all the containers
+docker remove -f <docker-id>
+```
+
+After the cleanup and the Docker Image creation of the Web API, it is time to start both the BlazorWasm and the Web API Docker Containers. 
+Open a Terminal and run the following commands:
+
+```bash
+docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
+docker run -p 7248:80 imagename-wasm
+```
+
+When we open a browser and navigate to the http://localhost:7248/account/login the Login page of the application is displayed.
+
+A user can log in and the user is redirected to the home page of the application,
+This the Authentication works as expected, The Login and Register link are not present anymore,
+instead you can see the Logout button and the username.
+
+![Containerise DotNET Final](Images/containerise_dotnet_final.png)
 
 
 
