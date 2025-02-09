@@ -168,10 +168,11 @@ The solution would be to add an **appsettings.Production.json** file to the **We
 In this case, the Environment is not the Production environment, and I want to give the Environment another name.
 See the next step!
 
-### Step 3: Specify Environment Name at Container Start
+### Step 3: Specify Environment at Container Start
 
 In Step 1 we created the Docker Image first, ran the Image and created/started the Docker Container after.
 Let's run the Docker Image again and specify the Environment: DockerStatusEnv, 
+
 Open a Terminal in the root of the project and execute the command below:
 
 ```bash
@@ -513,8 +514,7 @@ NGINX is a free and open-source web server that can be used to serve static cont
 Update the Dockerfile in the DockerWasm folder, like the file below
 
 ```dockerfile
-FROM nginx AS nginxbase
-
+FROM nginx:alpine AS nginxbase
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
@@ -615,244 +615,122 @@ docker run -p 7248:80 imagename-wasm
 ```
 
 Open a browser and navigate to the http://localhost:7248/account/login url.
-Not bad! The Login page of the Blazor WebAssembly application is displayed in the browser.
+Congratulations! The Login page of the Blazor WebAssembly application is displayed in the browser.
 
 ![Login screen](Images/login_screen.png)
 
+### Step 3: Try the Register and the Login Functionality
 
+Click the [Signup](http://localhost:7248/account/register) link and try to Register a new user.
 
+#### PROBLEM 13: An unhandled error has occurred. Reload
 
-This means we don't need to use the ASP.NET Core runtime Docker image as the base for our final image. So, how are we going to serve our files? The solution is to use NGINX.
+Open the Developers Tools of the Browser (in Chrome click F12) and check the Console window.
 
+The problem is that the register request is send to https://localhost:7177/api/account/register,
+but the Web API is only reachable on http://localhost:7177
 
-This is a correct behavior, in the publishing step of the **DockerFile** **BUILD_CONFIGURATION=Release** is specified,
-which defaults to the Production environment. In the project directory, there is no appsettings.Production.json file.
+![SSL Protocol Error](Images/err_ssl_protocol_error.png)
 
-```bash
-Unhandled exception. System.IO.FileNotFoundException: The configuration file 'appsettings.Production.json' was not found and is not optional. The expected physical path was '/app/appsettings.Production.json'.
-   at Microsoft.Extensions.Configuration.FileConfigurationProvider.Load(Boolean reload)
-   at Microsoft.Extensions.Configuration.ConfigurationManager.AddSource(IConfigurationSource source)
-   at Microsoft.Extensions.Configuration.ConfigurationManager.Microsoft.Extensions.Configuration.IConfigurationBuilder.Add(IConfigurationSource source)
-   at Program.<Main>$(String[] args) in /src/DotNet.BlazorWasmApp/Program.cs:line 8
+#### SOLUTION 13: 
+
+The port https://localhost:7177 is specified in the **appsettings.json** file from the **Blazor WebAssembly** project,
+and a solution could be to change it there. 
+
+This is not what I want, because I don't want the values in the appsettings.json file. Let's try something else.
+
+Here, I first tried to pass DockerStatusEnv as Environment variable at the start of the container, like we did before
+Then Docker could read the correct values from the appsettings.DockerStatusEnv.json file in the Blazor WebAssembly app.
+For some obscure reason, this didn't work ... Let's try plan B.
+
+In my search to find solution for the problem, I came across the article [How to use Docker environment variables for Blazor WebAssembly](https://medium.com/@yoann.visentin/blazor-webassembly-docker-environment-variables-and-appsettings-json-3106dfedff90)
+The author of the article used another approach. 
+He added a little script in the root of the Blazor WebAssembly project.
+
+Docker executes the script at every startup of the container. The script changes the values of the appsettings.json file in the Docker container,
+ande the values in the appsettings.json file in the repo stay unchanged.
+
+I will implement his solution in the next step.
+
+### Step 4: Add script.sh and execute script at Container Start up
+
+First, create a script.sh file at the root of the Blazor WebAssembly project with the following contents.
+
+```shell
+cat /usr/share/nginx/html/appsettings.json | jq --arg aVar "$(printenv ApiUrl)" '.ApiUrl = "http://localhost:7177"' > /usr/share/nginx/html/appsettings.json
+cat /usr/share/nginx/html/appsettings.json | jq --arg aVar "$(printenv Jwt:ValidAudience)" '.Jwt.ValidAudience = "http://localhost:7248"' > /usr/share/nginx/html/appsettings.json
+cat /usr/share/nginx/html/appsettings.json | jq --arg aVar "$(printenv Jwt:ValidAudience)" '.Jwt.ValidIssuer = "http://localhost:7177"' > /usr/share/nginx/html/appsettings.json
 ```
 
-#### SOLUTION 10:
+We also need to update our Dockerfile in the DockerWasm directory, because the jq library needs to be installed.
+(jq is a lightweight and flexible command-line JSON processor)
 
-The solution would be to add an **appsettings.Production.json** file to the **BlazorWasmApp project**.
-In this case, the Environment is not the Production environment, and I want to give the Environment another name.
-See the next step!
-
-### Step 3: Specify Environment Name at Container Start
-
-In Step 1 we created the Docker Image first, ran the Image and created/started the Docker Container after.
-Let's run the Docker Image again and specify the Environment: DockerStatusEnv,
-Open a Terminal in the root of the project and execute the command below:
+At the end of the file you can find 2 new lines added
 
 ```bash
-docker run --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
-```
-#### PROBLEM 3: appsettings.DockerStatusEnv.json - FileNotFoundException
-
-```bash
-Unhandled exception. System.IO.FileNotFoundException: The configuration file 'appsettings.DockerStatusEnv.json' was not found and is not optional.
-```
-#### SOLUTION 3: add appsettings.DockerStatusEnv.json file to the BlazorWasmApp project
-
-This is the same FileNoFoundException as before, but this is the Exception we want.
-
-We can now tell Docker to use the specific **appsettings.DockerStatusEnv.json** file.
-The only thing to do is to copy/paste the **appsettings.Development.json** and name it **appsettings.DockerStatusEnv.json**
-
-After you copy/paste the file, open a Terminal and run the `docker run` command below. FileNotFoundException again!
-
-```bash
-docker run --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
-```
-#### PROBLEM 4: appsettings.DockerStatusEnv.json - FileNotFoundException
-
-As you can see, Docker can still not find the **appsettings.DockerStatusEnv.json**.
-Although the **app settings file** is in the **BlazorWasmApp project**, it is **NOT in the Docker Image**.
-
-```bash
-Unhandled exception. System.IO.FileNotFoundException: The configuration file 'appsettings.
-DockerStatusEnv.json' was not found and is not optional. The expected physical path was '/app/appsettings.DockerStatusEnv.json'.
-```
-#### SOLUTION 4: Regenerate the Docker Image
-
-The solution to the above problem is rather simple.
-Open a Terminal and run the `docker build` command again to generate a new Docker Image.
-
-```bash
-docker build -t imagename-wasm:latest -f DockerWasm/Dockerfile .
+RUN apk add jq
+COPY ["DotNet.BlazorWasmApp/script.sh", "/docker-entrypoint.d/40-script.sh"]
 ```
 
-### Step 4: Start the Docker Container from the newly created Docker Image
+Below is the updated and final Dockerfile.
 
-We just generated a new Docker Image. Now, it is time to start the Docker Container
+```dockerfile
+FROM nginx:alpine AS nginxbase
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 
-```bash
-docker run --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
-```
-Finally, The **BlazorWasmApp Docker Container is up and running**. Yet another problem arises.
+USER $APP_UID
+WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
 
-![Docker Container](Images/docker_container_webapi_no_portforwarding.png)
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+ARG BUILD_CONFIGURATION=Release
+WORKDIR /src
 
-#### PROBLEM 5: Container running, but unreachable from the outside world.
+COPY ["DotNet.BlazorWasmApp/DotNet.BlazorWasmApp.csproj", "DotNet.BlazorWasmApp/"]
+COPY ["DotNet.Shared/DotNet.Shared.csproj", "DotNet.Shared/"]
 
-Although the Docker Container is running, see image above, you can not reach it by navigating to http://localhost:8080
+RUN dotnet restore "DotNet.Shared/DotNet.Shared.csproj"
+RUN dotnet restore "DotNet.BlazorWasmApp/DotNet.BlazorWasmApp.csproj"
+COPY . .
 
-#### SOLUTION 5: Publishing ports
+WORKDIR "/src/DotNet.BlazorWasmApp"
+RUN dotnet build "DotNet.BlazorWasmApp.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-From the dockerdocs: Publishing a port provides the ability to break through a little bit of networking isolation by setting up a forwarding rule.
-As an example, you can indicate that requests on your host’s port 5000 should be forwarded to the container’s port 8080.
-Publishing ports happens during container creation using the -p (or --publish) flag with docker run.
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "DotNet.BlazorWasmApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-The syntax is: `docker run -d -p HOST_PORT:CONTAINER_PORT nginx`
+FROM  nginxbase AS final
+WORKDIR /usr/share/nginx/html
 
-In this case, I would like to use the port **7177** specified in **Properties/launchSettings.json** file of the BlazorWasmApp project.
-
-```bash
-docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
-```
-You can reach the **BlazorWasmApp Docker Container** on your local machine by navigating to http://localhost:7177/weatherforecast
-
-![Weather forecast](Images/docker_container_webapi_weatherforecast.png)
-
-### Step 5: Register a User in the running BlazorWasmApp Docker Container
-
-In the step above, we **forwarded the Docker Container Port to a Port on our local machine**,
-and we reached the **WeatherController** in the **BlazorWasmApp Docker Container** and **received Weather Data in JSON format**.
-
-Next, we will try out the **Register a User** by sending a **Register Request** to the BlazorWasmApp Docker Container.
-Open **Postman** or **Insomnia```, and make a **Post Request** to the http://localhost:7177/api/account/register url. **Kaboom!**
-
-![Register User](Images/internal_server_error_register_user.png)
-
-#### PROBLEM 6: 500 Internal Server Error - LocalDB is not supported on this platform.
-
-```bash
- System.PlatformNotSupportedException: LocalDB is not supported on this platform.
-         at Microsoft.Data.SqlClient.SNI.LocalDB.GetLocalDBConnectionString(String localDbInstance)
-         at Microsoft.Data.SqlClient.SNI.SNIProxy.GetLocalDBDataSource(String fullServerName, Boolean& error)
-         at Microsoft.Data.SqlClient.SNI.SNIProxy.CreateConnectionHandle(String fullServerName, ...
+RUN apk add jq
+COPY ["DotNet.BlazorWasmApp/script.sh", "/docker-entrypoint.d/40-script.sh"]
+COPY --from=publish /app/publish/wwwroot .
+COPY  DotNet.BlazorWasmApp/nginx.conf /etc/nginx/nginx.conf
 ```
 
-When you send the **Register Request** to the **BlazorWasmApp Docker Container** the **RegisterController** is reached.
-The code in the controller gets executed, but throws an exception, when trying to insert the newly created user in the Database.
-
-In **Step 3**, we copy/paste the **appsettings.Development.json** and name it **appsettings.DockerStatusEnv.json** but
-the **Database Connection string** is still the same and Docker tries to make a connection to your **Local Machine's Database**.
-
-As you can read in the exception message, **LocalDB is not supported on this platform**.
-Actually, we don't want docker uses the LocalDB on the Local Machine. We want Docker uses a Sql Server Database on a Remote Machine.
-
-#### SOLUTION 6: Create a remote SQL database in Azure (or somewhere else)
-
-Open the **Azure Portal** and Log in. Click on the **Create Resource** button and Search for **SQL database**.
-Click on the **Create SQL database** and follow the instructions to create an **SQL database server** and an **SQL database**.
-
-**IMPORTANT**: Choose **Use SQL Authentication** when creating the **SQL database server**,
-and write down the **Server admin login** and **Password** as you will need them later.
-
-Give the **SQL database** the name: **DotNetDb**.
-
-After the SQL database and SQL Server have been created, you need to *Add your client IPv4 address* as a **Firewall rule**
-In Azure go to the **SQL database server you created**. In the **Security menu**, click on the **Networking sub menu**.
-In the **Public Access** Tab, enable **Selected networks**. At the **Firewall rules** section, click on the **Add your client IPv4 address (your IP address)** button and click Save.
-
-Next, Go to the **SQL database**, and click on **Show database Connection strings**. Copy the **ADO SQL Authentication Connection string**  for later use.
-
-### Step 6: Update Connection string in appsettings.Development.json file - Update Database
-
-Temporary change the Connection string in the appsettings.Development.json file to the copied Connection string.
-IMPORTANT: **Do not forget to update the Password**.
-
-```bash
-Server=tcp:yourservername.database.windows.net,1433;Initial Catalog=DotNetDb;Persist Security Info=False;User ID=yourserveradminlogin;Password=yourpassword;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
-```
-
-Open a **Terminal** at the root of the **DotNet.BlazorWasmApp project** and run the command below to **update the SQL Database in Azure**.
-When the Database update is successful, change the Connection string back to its original value.
-
-```bash
-dotnet ef database update
-```
-
-#### PROBLEM 7: Microsoft.Data.SqlClient.SqlException (0x80131904): Reason: An instance-specific error occurred while establishing a connection to SQL Server.
-
-You would encounter this exception, when you forgot to **Add your client IPv4 address (your IP address)** in your **SQL Database server**
-
-Microsoft.Data.SqlClient.SqlException (0x80131904): Reason: An instance-specific error occurred while establishing a connection to SQL Server.
-Connection was denied since Deny Public Network Access is set to Yes. ...
-
-### Step 5: Update Connection string in appsettings.DockerStatusEnv.json file - Register User
-
-Update the **Connection string** in the **appsettings.DockerStatusEnv.json** file.
-
-```bash
-Server=tcp:yourservername.database.windows.net,1433;Initial Catalog=DotNetDb;Persist Security Info=False;User ID=yourserveradminlogin;Password=yourpassword;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
-```
-
-The **Connection string** in the **appsettings.DockerStatusEnv.json** file has been updated.
-
-Yet, we need to apply this change to the Docker Image by creating a new Image.
-Open a Terminal in the root of the project (where the README.md file exists) and run the command below:
+Because we have added a script and updated the Dockerfile, we need to regenerate the Docker image.
+Open a Terminal at the level where the README.md file exists and run the command below:
 
 ```bash
 docker build -t imagename-wasm:latest -f DockerWasm/Dockerfile .
 ```
 
-After the Docker image has been created, Run the Docker image as a Docker Container by executing this command:
+After the Image has been created, start a Docker Container by executing the next command.
 
 ```bash
-docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
-```
-#### PROBLEM 8: There is already a Docker Container running on Port 7177
-
-docker: Error response from daemon:
-driver failed programming external connectivity on endpoint gifted_babbage (a2e4ab415d8797edb42c54da23002c37e7224471c1b03add5ffe68fc8a20acfe):
-Bind for 0.0.0.0:7177 failed: port is already allocated.
-
-#### SOLUTION 8: Stop the running Container
-
-Open a Terminal and run `docker ps` to see all the running containers.
-
-![Running Containers](Images/overview_running_containers.png)
-
-To stop a running container, use the **docker stop** command and provide the container ID, in this case
-
-```bash
-docker stop cc38db1cccc9
+docker run -p 7248:80 imagename-wasm 
 ```
 
-The old running container is stopped, execute the command below to run the new docker container
+Everything seems to work, and we can navigate to the http://localhost:7248/account/login url.
+The Login page of the Blazor WebAssembly application is displayed in the browser.
 
-```bash
-docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
-```
+A user can log in, and we receive the Access- and Refresh token needed for accessing the JWT protected Web API.
+There is still one problem. After a successful login, the user is redirected to the home page of the application,
+but it looks like he isn't really authenticated, because the Register- and Login link are still visible.
 
-### Step 7: Register a User in the running BlazorWasmApp Docker Container
-
-In the step above, we created and updated a remote SQL Database in Azure.
-And, we generated a new Docker Image and the new Docker Container is running on http://localhost:7177/weatherforecast
-
-We can reach the **WeatherController** in the **BlazorWasmApp Docker Container** because we **receive Weather Data in JSON format**.
-
-Next, we will try out the **Register a User** by sending a **Register Request** to the BlazorWasmApp Docker Container.
-Open **Postman** or **Insomnia```, and make a **Post Request** to the http://localhost:7177/api/account/register url.
-
-![Register User](Images/statuscode_200_register_user.png)
-
-Finally, the hard work pays off! We successfully registered a user in our running Docker Container.
-
-### Step 8: Test User Login and obtain Access and Refresh token
-
-Open **Postman** or **Insomnia```, and make a **Post Request** to the http://localhost:7177/api/account/login url.
-
-![Login User](Images/statuscode_200_login_user.png)
-
-The Login functionality works like expected, and we receive the Access- and Refresh token needed for accessing the JWT protected BlazorWasmApp.
-Now, it's time to do the same, but this time for the front-end Blazor WebAssembly application.
+#### Problem: IDX10206: Unable to validate audience. The 'audiences' parameter is empty.
 
 
 
