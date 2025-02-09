@@ -797,8 +797,10 @@ docker run -p 7248:80 imagename-wasm
 When we open a browser and navigate to the http://localhost:7248/account/login the Login page of the application is displayed.
 
 A user can log in and the user is redirected to the home page of the application,
-This the Authentication works as expected, The Login and Register link are not present anymore,
+This the Authentication works as expected, The Login and Register link are gone,
 instead you can see the Logout button and the username.
+
+And there are no more errors in the console of the Developer Tools of the browser, 
 
 ![Containerise DotNET Final](Images/containerise_dotnet_final.png)
 
