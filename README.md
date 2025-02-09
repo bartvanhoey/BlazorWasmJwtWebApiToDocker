@@ -124,7 +124,7 @@ After searching for solutions, I decided to take a different approach.
 
 #### SOLUTION 1: Create a DockerWebApi folder 
 
-The solution I found was to create a DockerWebApi folder in the parent folder (where the README.md file exists) of the WebApi project.
+The solution I came up with, was to create a DockerWebApi folder in the parent folder (where the README.md file exists) of the WebApi project.
 Once the DockerWebApi folder is created, copy/paste the Dockerfile in this folder. 
 
 Do not forget to re-add "DotNet.JwtWebApi/" again to the COPY line.
@@ -422,12 +422,12 @@ Open a Terminal in the root of the Blazor Web Assembly project and run the comma
 docker build -t imagename-wasm:latest .
 ```
 
-#### PROBLEM 9: COPY failed DotNet.Shared.csproj: not found
+#### PROBLEM 9: COPY failed DotNet.BlazorWasmApp.csproj: not found
 
 ERROR: failed to solve: failed to compute cache key: failed to calculate checksum of ref xzebf1n4v07hubsvxjhnei0p5::iw3202cg2dqjiyey8q031dz9t: 
-"/DotNet.Shared/DotNet.Shared.csproj": not found
+"/DotNet.BlazorWasmApp/DotNet.BlazorWasmApp.csproj": not found
 
-As you can see, the DotNet.Shared.csproj cannot be found.
+As you can see, the DotNet.BlazorWasmApp.csproj cannot be found.
 This is because of the **docker build command** where the **final dot** the context specifies.
 In this case, the context is the root of the BlazorWasmApp project.
 
@@ -453,9 +453,9 @@ Whereas the Shared.csproj file is in the root of the DotNet.Shared project and D
 I tried to navigate to the correct path location, by using relative paths, absolute paths, etc... but without success.
 After searching for solutions, I decided to take a different approach.
 
-#### SOLUTION 1: Create a DockerWasm folder
+#### SOLUTION 9: Create a DockerWasm folder
 
-The solution I found was to create a DockerWasm folder in the parent folder (where the README.md file exists) of the Blazor WebAssembly project.
+The solution I came up with, was to create a DockerWasm folder in the parent folder (where the README.md file exists) of the Blazor WebAssembly project.
 Once the DockerWasm folder is created, copy/paste the Dockerfile in this folder.
 
 Do not forget to re-add "DotNet.BlazorWasmApp/" again to the COPY line.
@@ -481,8 +481,8 @@ docker run imagename-wasm
 
 #### PROBLEM 10: The command could not be loaded, possibly because:
 
-After running the command above, this message with 2 possible reasons is shown in the terminal.
-We can exclude the last one, because we would have had this problem before, when running the Web API container. 
+After running the command above, this message with 2 possible reasons, is shown in the terminal.
+We can exclude the last one, because we would have had this problem before, when working on the Web API container. 
 
 Why is Docker showing the message: "The application 'DotNet.BlazorWasmApp.dll' does not exist"?
 
@@ -501,7 +501,7 @@ Learn about SDK resolution:
 https://aka.ms/dotnet/sdk-not-found
 ```
 
-#### SOLUTION 10:
+#### SOLUTION 10: use the NGINX Docker Image as final image for the Dockerfile
 
 Blazor WebAssembly produce static files when published and there is no need of the ASP.NET Core runtime to serve these files.
 Instead of the ASP.NET Core runtime Docker image as the base for the final image, we need another final image to serve our files?  
@@ -514,6 +514,7 @@ Update the Dockerfile in the DockerWasm folder, like the file below
 
 ```dockerfile
 FROM nginx AS nginxbase
+
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
@@ -598,9 +599,9 @@ docker run -p 7248:80 imagename-wasm
 This error message is a bit confusing, because the content of the file is correct.
 The problem has something to do with the encoding of the file. In my case, the encoding was UTF-8.
 
-#### SOLUTION 12:
-Open the nginx.conf file in Notepad++ and change its encoding to ANSI.
+#### SOLUTION 12: Change the Encoding of the nginx.conf file
 
+Open the nginx.conf file in Notepad++ and change its encoding to ANSI.
 After you changed the encoding run the Docker build command again to create the Image.
 
 ```bash
@@ -614,8 +615,11 @@ docker run -p 7248:80 imagename-wasm
 ```
 
 Open a browser and navigate to the http://localhost:7248/account/login url.
+Not bad! The Login page of the Blazor WebAssembly application is displayed in the browser.
 
 ![Login screen](Images/login_screen.png)
+
+
 
 
 This means we don't need to use the ASP.NET Core runtime Docker image as the base for our final image. So, how are we going to serve our files? The solution is to use NGINX.
