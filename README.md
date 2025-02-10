@@ -6,9 +6,9 @@ At the time of this writing, I was working on a project in which a **.NET Web AP
 
 The API is protected by **JSON Web Tokens authentication (JWT)** and both the **Blazor WASM app** and the **.NET Web API** had a reference on the same **Shared Class Library**.
 
-In the accompanying **GitHub Repo**, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**.
+In the accompanying **GitHub Repo**, in the Start folder, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**. In the End Folder you find the final version, after all the steps are implemented.
 
-To focus on the **Project's Containerization** and keep things simple, **only the Register and Login functionality** are implemented.
+To focus on the **Project's Containerization** and keep things simple, **only the Register and Login functionality** are present.
 
 ## Goal
 
