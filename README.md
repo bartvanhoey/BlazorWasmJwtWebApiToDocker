@@ -8,7 +8,7 @@ The API is protected by **JSON Web Tokens authentication (JWT)** and both the **
 
 In the accompanying **GitHub Repo**, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**.
 
-To focus on the **Project's Containerization** and keep things simple ,**only the Register and Login functionality** are implemented.
+To focus on the **Project's Containerization** and keep things simple, **only the Register and Login functionality** are implemented.
 
 ## Goal
 
@@ -49,7 +49,26 @@ When you run a Docker Image a **Docker Container** is created.
 A **Docker container** is a lightweight, standalone, and executable package,
 that includes everything needed (application code, runtime, libraries, and dependencies) to run an application.
 
-## Containerise .NET Web API
+### Some useful Docker Commands
+
+```bash
+# create a Docker image
+docker build -t <image-name>:<tag> . 
+# show list of Docker images
+docker images
+# remove the Docker image by its id
+docker rmi <image-id>
+# create and start a Docker container from a Docker image
+docker run -p [external port]:[internal port] --name <my-container> <image-name>:<tag>
+# show list of running Docker containers
+docker ps
+# start a docker container by its id
+docker start <docker-id>
+# stop a docker container by its id
+docker stop <docker-id>
+```
+
+## Containerize .NET Web API
 
 ### Step 1: Create a Docker Image for the .NET Web API
 
