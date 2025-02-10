@@ -141,7 +141,7 @@ After searching for solutions, I decided to take a different approach.
 
 #### SOLUTION 1: Create a DockerWebApi folder
 
-The solution I came up with, was to create a DockerWebApi folder in the parent folder (where the README.md file exists) of the WebApi project.
+The solution I came up with, was to create a DockerWebApi folder in the root of the solution of the WebApi project.
 Once the DockerWebApi folder is created, copy/paste the Dockerfile into this folder.
 
 Do not forget to re-add "DotNet.JwtWebApi/" again to the COPY line.
@@ -225,6 +225,8 @@ Unhandled exception. System.IO.FileNotFoundException: The configuration file 'ap
 DockerStatusEnv.json' was not found and is not optional. The expected physical path was '/app/appsettings.DockerStatusEnv.json'.
 ```
 
+The reason is that the configuration file we added to the project is not in the Docker Image yet.
+
 #### SOLUTION 4: Regenerate the Docker Image
 
 The solution to the above problem is rather simple.
@@ -236,13 +238,13 @@ docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
 
 ### Step 4: Start the Docker Container from the newly created Docker Image
 
-We just generated a new Docker Image. Now, it is time to start the Docker Container.
+We just generated a new Docker Image. Now, it is time to start the Docker Container again.
 
 ```bash
 docker run --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
 ```
 
-Finally, The **Web API Docker Container is up and running**. Yet another problem arises.  
+Finally, The **Web API Docker Container is up and running**, but another problem arises.  
 
 ![Docker Container](Images/docker_container_webapi_no_portforwarding.png)
 
@@ -274,7 +276,7 @@ In the step above, we **forwarded the Docker Container Port to a Port on our loc
 and we reached the **WeatherController** in the **Web API Docker Container** and **received Weather Data in JSON format**.
 
 Next, we will try out the **Register a User** by sending a **Register Request** to the Web API Docker Container.
-Open **Postman** or **Insomnia```, and make a **Post Request** to the <http://localhost:7177/api/account/register> URL. **Kaboom!**
+Open **Postman** or **Insomnia**, and make a **Post Request** to the <http://localhost:7177/api/account/register> URL. **Kaboom!**
 
 ![Register User](Images/internal_server_error_register_user.png)
 
@@ -288,7 +290,7 @@ Open **Postman** or **Insomnia```, and make a **Post Request** to the <http://lo
 ```
 
 When you send the **Register Request** to the **Web API Docker Container** the **RegisterController** is reached.
-The code in the controller gets executed but throws an exception when trying to insert the newly created user in the Database.
+The code in the controller gets executed but throws an exception when trying to insert the newly created user in the Local Database.
 
 In **Step 3**, we copy/paste the **appsettings.Development.json** and name it **appsettings.DockerStatusEnv.json** but
 the **Database Connection string** is still the same and Docker tries to make a connection to your **Local Machine's Database**.
@@ -345,8 +347,8 @@ Server=tcp:yourservername.database.windows.net,1433;Initial Catalog=DotNetDb;Per
 
 The **Connection string** in the **appsettings.DockerStatusEnv.json** file has been updated.
 
-Yet, we need to apply this change to the Docker Image by creating a new Image.
-Open a Terminal in the root of the project (where the README.md file exists) and run the command below:
+Because we changed the appsettings.DockerStatusEnv.json file in the project, we need to apply this change to the Docker Image by creating a new Image.
+Open a Terminal in the root of solution and run the command below:
 
 ```bash
 docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
@@ -390,7 +392,7 @@ And, we generated a new Docker Image and the new Docker Container is running on 
 We can reach the **WeatherController** in the **Web API Docker Container** because we **receive Weather Data in JSON format**.
 
 Next, we will try out the **Register a User** by sending a **Register Request** to the Web API Docker Container.
-Open **Postman** or **Insomnia```, and make a **Post Request** to the <http://localhost:7177/api/account/register> URL.
+Open **Postman** or **Insomnia**, and make a **Post Request** to the <http://localhost:7177/api/account/register> URL.
 
 ![Register User](Images/statuscode_200_register_user.png)
 
@@ -398,15 +400,15 @@ Finally, the hard work pays off! We successfully registered a user in our runnin
 
 ### Step 8: Test User Login and obtain Access and Refresh token
 
-Open **Postman** or **Insomnia```, and make a **Post Request** to the <http://localhost:7177/api/account/login> URL.
+Open **Postman** or **Insomnia**, and make a **Post Request** to the <http://localhost:7177/api/account/login> URL.
 
 ![Login User](Images/statuscode_200_login_user.png)
 
 The Login functionality works as expected, and we receive the Access- and Refresh tokens needed for accessing the JWT-protected Web API.
 
-## Containerise a Blazor WebAssembly application
+## Containerize a Blazor WebAssembly application
 
-The API is up and running. Now it's time to containerise the Blazor WebAssembly application.
+The API is up and running. Now it's time to Containerize the Blazor WebAssembly application.
 
 ### Step 1: Create a Docker Image for the Blazor WebAssembly application
 
@@ -480,12 +482,12 @@ After searching for solutions, I decided to take a different approach.
 
 #### SOLUTION 9: Create a DockerWasm folder
 
-The solution I came up with, was to create a DockerWasm folder in the parent folder (where the README.md file exists) of the Blazor WebAssembly project.
+The solution I came up with, was to create a DockerWasm folder in the root of the solution.
 Once the DockerWasm folder is created, copy/paste the Dockerfile into this folder.
 
 Do not forget to re-add "DotNet.BlazorWasmApp/" again to the COPY line.
 
-Open a Terminal in the parent folder of the DockerWasm folder and run the Docker build command to create the Image.
+Open a Terminal in the root of the solution and run the Docker build command to create the Image.
 
 ```bash
 docker build -t imagename-wasm:latest -f DockerWasm/Dockerfile .
@@ -607,7 +609,7 @@ http{
 }
 ```
 
-Open a Terminal in the parent folder of the DockerWasm folder and run the Docker build command to create the Image.
+Open a Terminal in the root of the solution and run the Docker build command to create the Image.
 
 ```bash
 docker build -t imagename-wasm:latest -f DockerWasm/Dockerfile .
@@ -662,7 +664,7 @@ but the Web API is only reachable on <http://localhost:7177>
 The port <https://localhost:7177> is specified in the **appsettings.json** file from the **Blazor WebAssembly** project,
 and a solution could be to change it there.
 
-This is not what I want, because I don't want the values in the appsettings.json file. Let's try something else.
+This is not what I want, because I don't want to change the values in the appsettings.json file. Let's try something else.
 
 Here, I first tried to pass DockerStatusEnv as an Environment variable at the start of the container, as we did before
 Then Docker could read the correct values from the appsettings.DockerStatusEnv.json file in the Blazor WebAssembly app.
@@ -736,7 +738,7 @@ COPY  DotNet.BlazorWasmApp/nginx.conf /etc/nginx/nginx.conf
 ```
 
 Because we have added a script and updated the Dockerfile, we need to regenerate the Docker image.
-Open a Terminal at the level where the README.md file exists and run the command below:
+Open a Terminal at root of the solution and run the command below:
 
 ```bash
 docker build -t imagename-wasm:latest -f DockerWasm/Dockerfile .
@@ -752,12 +754,13 @@ Everything seems to work, and we can navigate to the <http://localhost:7248/acco
 The Login page of the Blazor WebAssembly application is displayed in the browser.
 
 A user can log in, and we receive the Access- and Refresh token needed for accessing the JWT protected Web API.
+
 There is still one problem. After a successful login, the user is redirected to the home page of the application,
 but it looks like he isn't authenticated because the Register- and Login links are still visible.
 
 #### Problem 14: IDX10206: Unable to validate audience. The 'audiences' parameter is empty
 
-Open the Developer tools in the browser, and a little error message appears: IDX10206: Unable to validate audience. The 'audiences' parameter is empty.
+Open the Developer tools (click F12) in the browser, and a little error message appears: IDX10206: Unable to validate audience. The 'audiences' parameter is empty.
 
 The IDX10206 error occurs during JWT token validation when the audience claim cannot be properly validated.
 This typically happens due to either incorrect token creation, or improper validation configuration.
@@ -795,20 +798,22 @@ Below is the updated and final version of the appsettings.DockerStatusEnv.json f
 }
 ```
 
-As the appsettings.DockerStatusEnv.json file has changed we need to regenerate the Docker Image.
-Open a Terminal and run the `docker build` command again.
-
-```bash
-docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
-```
-
-First, Let's clean up our container environment by removing all the running and stopped containers from the previous steps.
+First, Let's clean up our Docker environment by removing all the running and stopped containers from the previous steps.
 
 ```bash
 # Display all containers with their status
 docker ps -a
 ## Remove a stopped or running container by its ID. Do this for all the containers
 docker remove -f <docker-id>
+```
+
+As the appsettings.DockerStatusEnv.json file has changed we need to regenerate the Docker Image.
+Open a Terminal and run the `docker build` command again.
+
+```bash
+# if needed regenerate the Docker Image for the Blazor WebAssembly 
+# docker build -t imagename-wasm:latest -f DockerWasm/Dockerfile .  
+docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
 ```
 
 After the cleanup and the Docker Image creation of the Web API, it is time to start both the BlazorWasm and the Web API Docker Containers.
@@ -826,7 +831,7 @@ A user can log in and the user is redirected to the home page of the application
 This time, the Authentication works as expected, the Login and Register links are not present anymore,
 instead, you can see the Logout button and the username.
 
-![Containerise DotNET Final](Images/containerise_dotnet_final.png)
+![Containerize DotNET Final](Images/Containerize_dotnet_final.png)
 
 
 

@@ -1,0 +1,3 @@
+cat /usr/share/nginx/html/appsettings.json | jq --arg aVar "$(printenv ApiUrl)" '.ApiUrl = "http://localhost:7177"' > /usr/share/nginx/html/appsettings.json
+cat /usr/share/nginx/html/appsettings.json | jq --arg aVar "$(printenv Jwt:ValidAudience)" '.Jwt.ValidAudience = "http://localhost:7248"' > /usr/share/nginx/html/appsettings.json
+cat /usr/share/nginx/html/appsettings.json | jq --arg aVar "$(printenv Jwt:ValidAudience)" '.Jwt.ValidIssuer = "http://localhost:7177"' > /usr/share/nginx/html/appsettings.json
