@@ -24,8 +24,6 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "DotNet.BlazorWasmApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-RUN ls --recursive /src/DotNet.BlazorWasmApp/
-
 FROM  nginxbase AS final
 WORKDIR /usr/share/nginx/html
 
