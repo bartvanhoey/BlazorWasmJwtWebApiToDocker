@@ -27,9 +27,7 @@ This journey was more difficult than I expected and that's why I decided to writ
 - Postman or Insomnia
 - Notepad++
 
-## Docker
-
-### What is Docker?
+## What is Docker?
 
 Docker is a platform for developing, shipping, and running applications inside lightweight, portable containers.
 These containers can be started in seconds.
