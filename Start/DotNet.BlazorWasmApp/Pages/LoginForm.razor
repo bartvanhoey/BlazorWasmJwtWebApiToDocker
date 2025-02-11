@@ -1,0 +1,65 @@
+﻿@page "/account/login"
+
+@using System.Net
+@using DotNet.BlazorWasmApp.Infra
+@using DotNet.BlazorWasmApp.Models
+@using DotNet.Shared
+@inject NavigationManager NavigationManager
+@inject IHttpClientFactory HttpClientFactory
+@inject AuthenticationStateProvider AuthState
+
+<div class="card mt-3 shadow-sm rounded auth-card">
+    <div class="px-4 pt-4">
+        <h2 class="card-title">Log in</h2>
+        <hr/>
+    </div>
+    <div class="card-body p-4 h-100">
+        <EditForm class="d-flex flex-column h-100" Model="LoginInputModel" method="post" OnValidSubmit="LoginUserAsync"
+                  FormName="login">
+            <DataAnnotationsValidator/>
+            <div class="form-floating mb-3">
+                <InputText id="email" @bind-Value="LoginInputModel.Email" class="form-control" autocomplete="username"
+                           aria-required="true"/>
+                <label for="email" class="form-label">Email</label>
+                <ValidationMessage For="() => LoginInputModel.Email" class="text-danger"/>
+            </div>
+            <div class="form-floating mb-3">
+                <InputText id="password" type="password"
+                           @bind-Value="LoginInputModel.Password" class="form-control" autocomplete="current-password"
+                           aria-required="true"/>
+                <label for="password" class="form-label">Password</label>
+                <ValidationMessage For="() => LoginInputModel.Password" class="text-danger"/>
+            </div>
+            <div class="mt-auto">
+                <button type="submit" class="w-100 mt-3 btn btn-lg btn-primary">Log in</button>
+                <p class="mt-3">
+                    Don't have an account?
+                    <a class="card-link"
+                       href="@(NavigationManager.GetUriWithQueryParameters("account/register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                        Sign up</a>
+                </p>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+
+
+@code {
+    [SupplyParameterFromQuery] private string? ReturnUrl { get; set; }
+    [SupplyParameterFromForm] private LoginInputModel LoginInputModel { get; set; } = new();
+
+    private async Task LoginUserAsync()
+    {
+        var httpclient = HttpClientFactory.CreateClient("ApiHttpClient");
+        var response = await httpclient.PostAsJsonAsync("api/account/login", LoginInputModel);
+        if (response.StatusCode == HttpStatusCode.OK)
+        {
+            var result = await response.Content.ReadFromJsonAsync<LoginResult>();
+            await ((CustomAuthenticationStateProvider)AuthState).UpdateAuthenticationState(result?.AccessToken, result?.RefreshToken);
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+}
