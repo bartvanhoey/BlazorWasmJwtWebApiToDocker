@@ -755,6 +755,8 @@ The Login page of the Blazor WebAssembly application is displayed in the browser
 
 A user can log in, and we receive the Access- and Refresh token needed for accessing the JWT protected Web API.
 
+### Step 5: User not Authenticated -IDX10206: Unable to validate audience
+
 There is still one problem. After a successful login, the user is redirected to the home page of the application,
 but it looks like he isn't authenticated because the Register- and Login links are still visible.
 
@@ -831,8 +833,8 @@ A user can log in and the user is redirected to the home page of the application
 This time, the Authentication works as expected, the Login and Register links are not present anymore,
 instead, you can see the Logout button and the username.
 
-![Containerize DotNET Final](Images/Containerize_dotnet_final.png)
+![Containerize DotNET Final](Images/containerise_dotnet_final.png)
 
-
+### Step 6: Docker Composer
 
 
