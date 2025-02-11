@@ -826,15 +826,67 @@ docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-w
 docker run -p 7248:80 imagename-wasm
 ```
 
-When we open a browser and navigate to the <http://localhost:7248/account/login> the Login page of the application is displayed.
-
-A user can log in and the user is redirected to the home page of the application,
+When we open a browser and navigate to the <http://localhost:7248/account/login> the Login page of the application is displayed and,
+ a user can log in and the user is redirected to the home page of the application,
 
 This time, the Authentication works as expected, the Login and Register links are not present anymore,
 instead, you can see the Logout button and the username.
 
 ![Containerize DotNET Final](Images/containerise_dotnet_final.png)
 
-### Step 6: Docker Composer
+### Step 6:  Update and Run all the Containers at once - Docker Compose
 
+The .NET Web Api and the Blazor WebAssembly application are up and running. We can register a user, login a user, logout a user.
 
+There is still something we can improve. When our code has changed, we wrote a new feature or fixed a bug, and we want the latest version, we need to stop the running Docker containers. Then we need to rebuild the Docker images. Finally we need to restart the Docker containers. This means a user needs to enter 7 commands in the Terminal.
+
+```bash
+# Stop Docker containers
+docker ps
+docker stop <docker-id-webapi> 
+docker stop <docker-id-wasm> 
+
+# Generate Docker images
+docker build -t imagename-wasm:latest -f DockerWasm/Dockerfile .
+docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
+
+# Start Docker containers
+docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
+docker run -p 7248:80 imagename-wasm 
+```
+
+We can replace these statements with one statement. `docker compose up`
+To do this we first need to add a compose.yaml file in the root of the solution.
+
+```bash
+# content of the compose.yaml file
+services:
+  dotnet.blazor-wasm-app:
+    build:
+      context: .
+      dockerfile: DockerWasm/Dockerfile
+    ports:
+      - "7248:80"
+    container_name: ctr-blazor-wasm-app
+  
+  dotnet.jwt-web-api:
+   build:
+     context: .
+     dockerfile: DockerWebApi/Dockerfile
+   ports:
+     - "7177:8080"
+   environment:
+     - ASPNETCORE_ENVIRONMENT=DockerStatusEnv
+   container_name: ctr-jwt-web-api
+```
+
+In this file you see 2 services. the Blazor WebAssembly app and the Web Api.
+When you run the `docker compose up` command, Docker searches per service for the correct Dockerfile.
+It also forwards the **Host port** to the correct **Container port** and the correct **environment variables** are set.
+
+The only thing we need to do is to open a Terminal in the root of the solution an run the command below:
+
+```bash
+# docker compose up --build --force-recreate --no-deps -d dotnet.blazor-wasm-app dotnet.jwt-web-api
+docker compose up --build --force-recreate --no-deps -d
+```
