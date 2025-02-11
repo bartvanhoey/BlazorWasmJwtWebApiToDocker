@@ -890,3 +890,7 @@ The only thing we need to do is to open a Terminal in the root of the solution a
 # docker compose up --build --force-recreate --no-deps -d dotnet.blazor-wasm-app dotnet.jwt-web-api
 docker compose up --build --force-recreate --no-deps -d
 ```
+
+
+
+
