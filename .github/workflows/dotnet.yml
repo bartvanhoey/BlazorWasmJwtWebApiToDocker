@@ -40,5 +40,5 @@ jobs:
           run: dotnet restore ./End/DotNet.BlazorWasmApp/DotNet.BlazorWasmApp.csproj
         
         - name: Build
-          run: dotnet build ./End/DotNet.BlazorWasmApp/DotNet.BlazorWasmApp --no-restore
+          run: dotnet build ./End/DotNet.BlazorWasmApp/DotNet.BlazorWasmApp.csproj --no-restore
         
