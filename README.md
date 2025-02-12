@@ -10,10 +10,10 @@ In the accompanying **GitHub Repo**, in the Start folder, you find the same setu
 
 To focus on the **Project's Containerization** and keep things simple, **only the Register and Login functionality** are present.
 
-## Goal
+## Goal: Get the Latest Project Status with a Single Command
 
 **Dockerize** the complete project, so that **project owners can always see the latest status** of the project,
-by just entering a few commands via the Terminal.
+by just entering a single ``docker compose up`` command via the Terminal.
 
 This journey was more difficult than I expected and that's why I decided to write an article about it—**to organize my thoughts and provide a reference for others** who may encounter the same problems.
 
