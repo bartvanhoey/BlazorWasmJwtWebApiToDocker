@@ -10,10 +10,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  build_end_api:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     
@@ -28,4 +26,19 @@ jobs:
     - name: Build
       run: dotnet build ./End/DotNet.JwtWebApi/DotNet.JwtWebApi.csproj --no-restore
     
-    
+  build_end_wasm:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v4
+        
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 9.0.x
+        
+        - name: Restore dependencies
+          run: dotnet restore ./End/DotNet.BlazorWasmApp/DotNet.BlazorWasmApp.csproj
+        
+        - name: Build
+          run: dotnet build ./End/DotNet.BlazorWasmApp/DotNet.BlazorWasmApp --no-restore
+        
