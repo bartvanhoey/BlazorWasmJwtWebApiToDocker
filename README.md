@@ -50,13 +50,13 @@ that includes everything needed (application code, runtime, libraries, and depen
 ### Some useful Docker Commands
 
 ```bash
-# create a Docker image
+# create a Docker Image
 docker build -t <image-name>:<tag> . 
-# show list of Docker images
+# show list of Docker Images
 docker images
-# remove the Docker image by its id
+# remove the Docker Image by its id
 docker rmi <image-id>
-# create and start a Docker container from a Docker image
+# create and start a Docker container from a Docker Image
 docker run -p [external port]:[internal port] --name <my-container> <image-name>:<tag>
 # show list of running Docker containers
 docker ps
@@ -71,7 +71,7 @@ docker stop <docker-id>
 ### Step 1: Create a Docker Image for the .NET Web API
 
 Open your code editor and add a Dockerfile to the Web API project.
-I used JetBrains Rider to add the Dockerfile, and below is the file that was generated.  
+I used **JetBrains Rider** to add the **Dockerfile**, and here is the resulting file.
 
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
@@ -168,8 +168,8 @@ docker run imagename-webapi
 #### PROBLEM 2: appsettings.Production.json - FileNotFoundException
 
 After running the command above, an Unhandled FileNotFoundException is thrown.
-This is a correct behavior, in the publishing step of the **DockerFile** **BUILD_CONFIGURATION=Release** is specified,
-which defaults to the Production environment. In the project directory, there is no appsettings.Production.json file.
+This is correct behavior, in the publishing step of the **DockerFile** **BUILD_CONFIGURATION=Release** is specified,
+which **defaults to the Production environment**. In the project directory, there is no appsettings.Production.json file.
 
 ```bash
 Unhandled exception. System.IO.FileNotFoundException: The configuration file 'appsettings.Production.json' was not found and is not optional. The expected physical path was '/app/appsettings.Production.json'.
@@ -354,7 +354,7 @@ Open a Terminal in the root of solution and run the command below:
 docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
 ```
 
-After the Docker image has been created, Run the Docker image as a Docker Container by executing this command:
+After the Docker Image has been created, Run the Docker Image as a Docker Container by executing this command:
 
 ```bash
 docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-webapi
@@ -404,7 +404,7 @@ Open **Postman** or **Insomnia**, and make a **Post Request** to the <http://loc
 
 ![Login User](Images/statuscode_200_login_user.png)
 
-The Login functionality works as expected, and we receive the Access- and Refresh tokens needed for accessing the JWT-protected Web API.
+The login functionality works as expected, and we receive the Access- and Refresh tokens needed to access the JWT-protected Web API.
 
 ## Containerize a Blazor WebAssembly application
 
@@ -531,11 +531,11 @@ https://aka.ms/dotnet/sdk-not-found
 #### SOLUTION 10: use the NGINX Docker Image as final image for the Dockerfile
 
 Blazor WebAssembly produces static files when published and there is no need for the ASP.NET Core runtime to serve these files.
-Instead of the ASP.NET Core runtime Docker image as the base for the final image, do we need another final image to serve our files?  
+Instead of the ASP.NET Core runtime Docker Image as the base for the final image, do we need another final image to serve our files?  
 
 NGINX to the rescue!
 
-NGINX is a free and open-source web server that can be used to serve static content and, there is also a Docker image available.
+NGINX is a free and open-source web server that can be used to serve static content and, there is also a Docker Image available.
 
 Update the Dockerfile in the DockerWasm folder, like the file below.
 
@@ -623,7 +623,7 @@ docker run -p 7248:80 imagename-wasm
 
 #### PROBLEM 12: nginx: unknown directive "events" in /etc/nginx/nginx.conf:1
 
-This error message is a bit confusing because the file contentis correct.
+This error message is a bit confusing because the file content is correct.
 The problem has something to do with the encoding of the file. In my case, the encoding was UTF-8.
 
 #### SOLUTION 12: Change the Encoding of the nginx.conf file
@@ -648,7 +648,7 @@ Congratulations! The Login page of the Blazor WebAssembly application is display
 
 ### Step 3: Try the Register and the Login Functionality
 
-Click the [Signup](http://localhost:7248/account/register) link and try to Register a new user.
+Click the [Sign up](http://localhost:7248/account/register) link and try to Register a new user.
 
 #### PROBLEM 13: An unhandled error has occurred. Reload
 
@@ -671,17 +671,16 @@ Then Docker could read the correct values from the appsettings.DockerStatusEnv.j
 For some obscure reason, this didn't work ... Let's try plan B.
 
 In my search to find a solution for the problem, I came across the article [How to use Docker environment variables for Blazor WebAssembly](https://medium.com/@yoann.visentin/blazor-webassembly-docker-environment-variables-and-appsettings-json-3106dfedff90)
-The author of the article used another approach.
-He added a little script in the root of the Blazor WebAssembly project.
+The author of the article used another approach and added a little script to the root of the Blazor WebAssembly project.
 
-Docker executes the script at every startup of the container. The script changes the values of the appsettings.json file in the Docker container,
+Docker **executes the script at every startup** of the container. The **script changes the values of the appsettings.json** file in the Docker container,
 and the values in the appsettings.json file in the repo stay unchanged.
 
 I will implement his solution in the next step.
 
 ### Step 4: Add script.sh and execute script at Container Start-up
 
-First, create a script.sh file at the root of the Blazor WebAssembly project with the following contents.
+First, create a **script.sh** file at the root of the **Blazor WebAssembly project** with the following contents.
 
 ```shell
 cat /usr/share/nginx/html/appsettings.json | jq --arg aVar "$(printenv ApiUrl)" '.ApiUrl = "http://localhost:7177"' > /usr/share/nginx/html/appsettings.json
@@ -689,10 +688,10 @@ cat /usr/share/nginx/html/appsettings.json | jq --arg aVar "$(printenv Jwt:Valid
 cat /usr/share/nginx/html/appsettings.json | jq --arg aVar "$(printenv Jwt:ValidAudience)" '.Jwt.ValidIssuer = "http://localhost:7177"' > /usr/share/nginx/html/appsettings.json
 ```
 
-We also need to update our Dockerfile in the DockerWasm directory, because the jq library needs to be installed.
+We also need to update our Dockerfile in the DockerWasm directory, because the **jq library** needs to be installed.
 (jq is a lightweight and flexible command-line JSON processor)
 
-At the end of the file, you can find 2 new lines added.
+At the end of the Dockerfile, you can find 2 new lines added.
 
 ```bash
 RUN apk add jq
@@ -737,7 +736,7 @@ COPY --from=publish /app/publish/wwwroot .
 COPY  DotNet.BlazorWasmApp/nginx.conf /etc/nginx/nginx.conf
 ```
 
-Because we have added a script and updated the Dockerfile, we need to regenerate the Docker image.
+Because we have added a script and updated the Dockerfile, we need to regenerate the Docker Image.
 Open a Terminal at root of the solution and run the command below:
 
 ```bash
@@ -753,7 +752,7 @@ docker run -p 7248:80 imagename-wasm
 Everything seems to work, and we can navigate to the <http://localhost:7248/account/login> URL.
 The Login page of the Blazor WebAssembly application is displayed in the browser.
 
-A user can log in, and we receive the Access- and Refresh token needed for accessing the JWT protected Web API.
+A user can log in, and we receive the **Access- and Refresh token** needed **to access the JWT protected Web API**.
 
 ### Step 5: User not Authenticated -IDX10206: Unable to validate audience
 
@@ -808,7 +807,7 @@ docker ps -a
 ## Remove a stopped or running container by its ID. Do this for all the containers
 docker remove -f <docker-id>
 ```
-
+A
 As the appsettings.DockerStatusEnv.json file has changed we need to regenerate the Docker Image.
 Open a Terminal and run the `docker build` command again.
 
@@ -818,7 +817,7 @@ Open a Terminal and run the `docker build` command again.
 docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
 ```
 
-After the cleanup and the Docker Image creation of the Web API, it is time to start both the BlazorWasm and the Web API Docker Containers.
+After the cleanup and the Docker Image creation of the Web API, we start both the BlazorWasm and the Web API Docker Containers.
 Open a Terminal and run the following commands:
 
 ```bash
@@ -829,16 +828,18 @@ docker run -p 7248:80 imagename-wasm
 When we open a browser and navigate to the <http://localhost:7248/account/login> the Login page of the application is displayed and,
  a user can log in and the user is redirected to the home page of the application,
 
-This time, the Authentication works as expected, the Login and Register links are not present anymore,
+This time, the **authentication** works as expected, the **Login and Register links** are not there anymore,
 instead, you can see the Logout button and the username.
 
 ![Containerize DotNET Final](Images/containerise_dotnet_final.png)
 
 ### Step 6:  Update and Run all the Containers at once - Docker Compose
 
-The .NET Web Api and the Blazor WebAssembly application are up and running. We can register a user, login a user, logout a user.
+The **.NET Web API** and the **Blazor WebAssembly** application are up and running. We can register as a user, log in as a user, log out as a user.
 
-There is still something we can improve. When our code has changed, we wrote a new feature or fixed a bug, and we want the latest version, we need to stop the running Docker containers. Then we need to rebuild the Docker images. Finally we need to restart the Docker containers. This means a user needs to enter 7 commands in the Terminal.
+There is still something we can improve. When our code has changed, we wrote a new feature or fixed a bug, and we want the latest version,
+we need to stop the running Docker containers. Then we need to rebuild the Docker Images.
+Finally, we need to restart the Docker containers. This means a user needs to enter 7 commands in the Terminal.
 
 ```bash
 # Stop Docker containers
@@ -846,7 +847,7 @@ docker ps
 docker stop <docker-id-webapi> 
 docker stop <docker-id-wasm> 
 
-# Generate Docker images
+# Generate Docker Images
 docker build -t imagename-wasm:latest -f DockerWasm/Dockerfile .
 docker build -t imagename-webapi:latest -f DockerWebApi/Dockerfile .
 
@@ -855,8 +856,8 @@ docker run -p 7177:8080 --env ASPNETCORE_ENVIRONMENT=DockerStatusEnv imagename-w
 docker run -p 7248:80 imagename-wasm 
 ```
 
-We can replace these statements with one statement. `docker compose up`
-To do this we first need to add a compose.yaml file in the root of the solution.
+We can replace all these statements with one statement. `docker compose up`
+To do this we first need to add a **compose.yaml** file in the root of the solution.
 
 ```bash
 # content of the compose.yaml file
@@ -880,11 +881,12 @@ services:
    container_name: ctr-jwt-web-api
 ```
 
-In this file you see 2 services. the Blazor WebAssembly app and the Web Api.
+In this file you find 2 services: The **Blazor WebAssembly service** and the **Web API service**.
+
 When you run the `docker compose up` command, Docker searches per service for the correct Dockerfile.
 It also forwards the **Host port** to the correct **Container port** and the correct **environment variables** are set.
 
-The only thing we need to do is to open a Terminal in the root of the solution an run the command below:
+The only thing we need to do is to open a Terminal in the root of the solution and run the command below:
 
 ```bash
 # docker compose up --build --force-recreate --no-deps -d dotnet.blazor-wasm-app dotnet.jwt-web-api
