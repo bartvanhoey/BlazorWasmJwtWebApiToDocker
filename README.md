@@ -4,6 +4,8 @@ A **step-by-step guide** on **containerizing** a **Blazor WebAssembly** and a **
 
 ## Goal: Instantly Get the Latest Project Status with a Single Command
 
+At the time of this writing, I was working on a project in which a **.NET Web API** was consumed by a **Blazor WebAssembly** application.
+
 **Dockerize** the complete project, so that **project owners can always see the latest status** of the project,
 by just entering a single ``docker compose up`` command via the Terminal.
 
@@ -11,11 +13,11 @@ This journey was more difficult than I expected and that's why I decided to writ
 
 ## Description
 
-At the time of this writing, I was working on a project in which a **.NET Web API** was consumed by a **Blazor WebAssembly** application.
-
 The API is protected by **JSON Web Tokens authentication (JWT)** and both the **Blazor WASM app** and the **.NET Web API** had a reference on the same **Shared Class Library**.
 
-In the accompanying **GitHub Repo**, in the Start folder, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**. In the End Folder you find the final version, after all the steps are implemented.
+In the accompanying **GitHub Repo**, in the Start folder, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**. 
+
+In the End Folder you find the final version, after all the steps are implemented.
 
 To focus on the **Project's Containerization** and keep things simple, **only the Register and Login functionality** are present.
 
