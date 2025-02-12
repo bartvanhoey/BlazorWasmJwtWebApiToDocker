@@ -1,5 +1,7 @@
 # Blazor WASM + JWT Web API => Docker
 
+[![.NET](https://github.com/bartvanhoey/BlazorWasmJwtWebApiToDocker/actions/workflows/dotnet.yml/badge.svg)](https://github.com/bartvanhoey/BlazorWasmJwtWebApiToDocker/actions/workflows/dotnet.yml)
+
 A **step-by-step guide** on **containerizing** a **Blazor WebAssembly** and a **.NET Web API with JWT Authentication**.
 
 At the time of this writing, I was working on a project in which a **.NET Web API** was consumed by a **Blazor WebAssembly** application.
