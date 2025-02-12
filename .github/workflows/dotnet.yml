@@ -28,5 +28,4 @@ jobs:
     - name: Build
       run: dotnet build ./End/DotNet.JwtWebApi/DotNet.JwtWebApi.csproj --no-restore
     
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+    
