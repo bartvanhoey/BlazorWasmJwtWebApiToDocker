@@ -4,9 +4,7 @@
 
 A **step-by-step guide** on **containerizing** a **Blazor WebAssembly** and a **.NET Web API with JWT Authentication**.
 
-At the time of this writing, I was working on a project in which a **.NET Web API** was consumed by a **Blazor WebAssembly** application.
-
-The API is protected by **JSON Web Tokens authentication (JWT)** and both the **Blazor WASM app** and the **.NET Web API** had a reference on the same **Shared Class Library**.
+At the time of this writing, I was working on a project in which a **.NET Web API** was consumed by a **Blazor WebAssembly** application. The API is protected by **JSON Web Tokens authentication (JWT)** and both the **Blazor WASM app** and the **.NET Web API** had a reference on the same **Shared Class Library**.
 
 ## Goal: Instantly Get the Latest Project Status with a Single Command
 
