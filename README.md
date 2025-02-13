@@ -1,4 +1,4 @@
-# Blazor WASM + JWT Web API => Docker
+# Containerization: Blazor WASM + JWT Web API => Docker
 
 [![.NET](https://github.com/bartvanhoey/BlazorWasmJwtWebApiToDocker/actions/workflows/dotnet.yml/badge.svg)](https://github.com/bartvanhoey/BlazorWasmJwtWebApiToDocker/actions/workflows/dotnet.yml)
 
