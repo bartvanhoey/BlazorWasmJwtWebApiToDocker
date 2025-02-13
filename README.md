@@ -8,7 +8,7 @@ At the time of this writing, I was working on a project in which a **.NET Web AP
 
 ## Goal: Instantly Get the Latest Project Status with a Single Command
 
-I decided to **Dockerize** the complete project, so that **project owners can always see the latest status** of the project,
+I decided to **dockerize** the complete project, so that **project owners could always see the latest status** of the project,
 by just entering a single ``docker compose up`` command via the Terminal.
 
 This journey was more difficult than I expected and that's why I decided to write an article about it—**to organize my thoughts and provide a reference for others** who may encounter the same problems.
