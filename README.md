@@ -15,7 +15,7 @@ This journey was more difficult than I expected and that's why I decided to writ
 
 ## Project Description
 
-In the accompanying **GitHub Repo**, in the Start folder, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**. 
+In the accompanying **GitHub Repo**, in the **Start folder**, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**.
 
 In the **End Folder** you find the **final version**, after all the steps are implemented.
 
