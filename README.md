@@ -898,6 +898,16 @@ The only thing we need to do is to open a Terminal in the root of the solution a
 git pull docker compose up --build --force-recreate --no-deps -d
 ```
 
+## Conclusion
 
+Containerizing .NET applications provides a robust way to simplify deployment and improve scalability.
 
+Through this guide, we've covered the steps to build, configure, and run these
+applications in Docker containers, ensuring a seamless authentication process and compatibility across environments.
 
+Additionally, by utilizing Docker Compose, we significantly reduced the complexity of managing multi-container
+applications. The `docker compose up` command allows us to quickly build, update, and start all required containers with
+minimal effort, streamlining development and deployment processes even as new features or changes are introduced.
+
+By following the outlined steps and best practices, you now have a scalable, repeatable, and efficient setup for running
+modern .NET applications in a containerized environment.
