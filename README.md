@@ -19,7 +19,7 @@ In the accompanying **GitHub Repo**, in the **Start folder**, you find the same 
 
 In the **End Folder** you find the **final version**, after all the steps are implemented.
 
-To focus on the **Project's Containerization** and keep things simple, **only the Register and Login functionality** are present.
+To focus on the **Containerization** and keep things simple, **only the Register and Login functionality** are present.
 
 ## Requirements
 
