@@ -15,9 +15,11 @@ This journey was more difficult than I expected and that's why I decided to writ
 
 ## Project Description
 
-In the accompanying **GitHub Repo**, in the **Start folder**, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**.
+I have written this guide in a way that junior and medior developers can easily follow along as they deepen their knowledge of containerization.
 
-In the **End Folder** you find the **final version**, after all the steps are implemented.
+In the **Start folder** of this repo, you find the same setup of a **.NET Web API protected by JWT authentication** where the API is consumed by a **Blazor WebAssembly application**.
+
+In the **End Folder** you find the **final version**, after all the steps are implemented and the application is up and running.
 
 To focus on the **Containerization** and keep things simple, **only the Register and Login functionality** are present.
 
@@ -893,8 +895,7 @@ It also forwards the **Host port** to the correct **Container port** and the cor
 The only thing we need to do is to open a Terminal in the root of the solution and run the command below:
 
 ```bash
-# docker compose up --build --force-recreate --no-deps -d dotnet.blazor-wasm-app dotnet.jwt-web-api
-docker compose up --build --force-recreate --no-deps -d
+git pull docker compose up --build --force-recreate --no-deps -d
 ```
 
 
